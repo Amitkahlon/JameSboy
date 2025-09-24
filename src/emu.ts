@@ -47,4 +47,8 @@ class Emu {
 
         return 0
     }
+
+    addCycles(cycles: number) {
+        console.log("not implemented");
+    }
 }
