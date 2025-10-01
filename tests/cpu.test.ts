@@ -5,6 +5,8 @@ import { readFile } from 'fs/promises';
 import { fileURLToPath } from 'url';
 import { romTypeName, } from '@/entities/ROM_TYPES';
 import { licCodeeName } from '@/entities/LIC_CODE';
+import { CPU } from '@/cpu';
+import { Bus } from '@/bus';
 
 
 
@@ -52,6 +54,12 @@ describe("cart dmg acid tests", () => {
   })
 
 })
+
+// describe("cpu class", () => {
+//   const cpu = new CPU(new Bus())
+
+
+// })
 
 
 

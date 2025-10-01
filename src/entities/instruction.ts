@@ -2,6 +2,7 @@ import { u8 } from "@/common";
 
 // --- Addressing modes ---
 export enum AddrMode {
+    NULL,
     AM_IMP,
     AM_R_D16,
     AM_R_R,
@@ -27,6 +28,7 @@ export enum AddrMode {
 
 // --- Register types ---
 export type RegType =
+    "null" |
     "none" |
     "a" |
     "f" |
@@ -46,6 +48,7 @@ export type RegType =
 
 // --- Instruction types ---
 export enum InType {
+    NULL,
     IN_NONE,
     IN_NOP,
     IN_LD,
@@ -99,6 +102,7 @@ export enum InType {
 
 // --- Conditions ---
 export enum CondType {
+    NULL,
     CT_NONE,
     CT_NZ,
     CT_Z,
@@ -108,11 +112,11 @@ export enum CondType {
 
 // --- Instruction shape ---
 export interface Instruction {
-    type: InType;
-    mode: AddrMode;
-    reg_1: RegType;
-    reg_2: RegType;
-    cond: CondType;
-    param: u8; // immediate 8-bit parameter when relevant
+    type?: InType;
+    mode?: AddrMode;
+    reg_1?: RegType;
+    reg_2?: RegType;
+    cond?: CondType;
+    param?: u8; // immediate 8-bit parameter when relevant
 }
 
