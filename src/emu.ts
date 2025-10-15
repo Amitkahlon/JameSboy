@@ -1,8 +1,9 @@
+import { Bus } from "./bus"
 import { delay } from "./common"
 import { CPU } from "./cpu"
 
-class Emu {
-    cpu: CPU = new CPU()
+export class Emu {
+    cpu: CPU = new CPU(new Bus())
 
     paused: boolean
     running: boolean
@@ -23,20 +24,24 @@ class Emu {
         this.ticks = 0
     }
 
-    getContext() { return Emu.context }
+
+
+    public async insertCart(romFile: File) {
+        await this.cpu.insertCart(romFile)
+    }
 
     static context: Emu = new Emu()
 
-    async emu_run(carthage: string): Promise<number> {
-
-
+    async emu_run(): Promise<number> {
         while (true) {
+            await delay(1000)
+
             if (this.paused) {
                 await delay(100)
                 continue
             }
 
-            if (!this.cpu.cpu_step) {
+            if (!this.cpu.cpu_step()) {
                 console.log("cpu stopped")
                 return -3
             }

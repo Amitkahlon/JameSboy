@@ -19,7 +19,7 @@ import { BETWEEN } from "./common";
 // FFFF      : IE (interrupt enable)
 
 export class Bus {
-    cart: Cartridge
+    cart: Cartridge = new Cartridge()
     private wram: Uint8Array = new Uint8Array(0x2000); // 8KB Work RAM
     private vram: Uint8Array = new Uint8Array(0x2000); // 8KB VRAM
 

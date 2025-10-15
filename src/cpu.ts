@@ -3,10 +3,12 @@ import { u16, u8 } from "./common"
 import { AddrMode, Instruction, RegType } from "./entities/instruction"
 import { InstructionTable } from "./entities/instructionTable"
 import { CPU_Registers } from "./entities/ProgramRegisters"
+import { IntegerHelper } from "./utils/integerHelper"
 
 const instructionTable = new InstructionTable()
 
 export class CPU {
+
     private regs: CPU_Registers
     private mem: Bus
     private fetchedData: u16
@@ -24,6 +26,10 @@ export class CPU {
         this.regs.a = 0x01
     }
 
+    public async insertCart(romFile: File) {
+        await this.mem.cart.initCart(romFile)
+    }
+
     cpu_step(): boolean {
         const opcode = this.fetch()
         const currInstruction = this.decodeAndFetchData(opcode)
@@ -34,12 +40,13 @@ export class CPU {
 
     fetch(): u8 {
         var currWord = this.mem.read(this.regs.pc)
-        this.regs.pc++;
+        this.regs.incrementPC()
         return currWord;
     }
 
     public decodeAndFetchData(opcode: u8): Instruction {
         const instruction = instructionTable.get(opcode)
+        this.cur_inst = instruction
 
         // this is how I get my values,
         // for example AM_R_D8 saves u8 in register
@@ -68,6 +75,7 @@ export class CPU {
 
 
     execute(instruction: Instruction, opcode: u8) {
-
+        console.log(`Executing instruction: 0X${opcode.toString(16)}`)
+        console.log(this.regs.toString().padStart(2, "0"))
     }
 }

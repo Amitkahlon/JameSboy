@@ -1,4 +1,4 @@
-class IntegerHelper {
+export class IntegerHelper {
     static toU8(n: number): number {
         return n & 0xFF;
     }

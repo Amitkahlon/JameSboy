@@ -50,4 +50,26 @@ export class CPU_Registers {
         this.l = value & 0xFF;
     }
 
+    public incrementPC() {
+        this.pc++
+    }
+
+    toString(): string {
+        const Z = (this.f & 0x80) ? 1 : 0; // Zero
+        const N = (this.f & 0x40) ? 1 : 0; // Subtract
+        const H = (this.f & 0x20) ? 1 : 0; // Half-carry
+        const C = (this.f & 0x10) ? 1 : 0; // Carry
+
+        return `A:${this.a.toString(16).padStart(2, "0")} ` +
+            `F:${this.f.toString(16).padStart(2, "0")} ` +
+            `B:${this.b.toString(16).padStart(2, "0")} ` +
+            `C:${this.c.toString(16).padStart(2, "0")} ` +
+            `D:${this.d.toString(16).padStart(2, "0")} ` +
+            `E:${this.e.toString(16).padStart(2, "0")} ` +
+            `H:${this.h.toString(16).padStart(2, "0")} ` +
+            `L:${this.l.toString(16).padStart(2, "0")} ` +
+            `PC:${this.pc.toString(16).padStart(4, "0")} ` +
+            `SP:${this.sp.toString(16).padStart(4, "0")} ` +
+            `[Z:${Z} N:${N} H:${H} C:${C}]`;
+    }
 }

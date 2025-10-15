@@ -1,6 +1,4 @@
-import { promises as fs } from "node:fs";
-import { readFile } from 'fs/promises';
-import path from "node:path";
+
 
 
 export interface RomHeader {
@@ -22,14 +20,29 @@ export interface RomHeader {
 
 
 export class Cartridge {
+
   rom: Uint8Array
   rom_header: RomHeader
 
-  async initCart(fileName: string) {
-    const romPath = path.resolve(__dirname, `../public/roms/${fileName}.gb`);
-    const buffer = await readFile(romPath);
-    this.rom = new Uint8Array(buffer);
+  private async loadROM(pathOrFile: string | File): Promise<Uint8Array> {
+    if (typeof window === "undefined") {
+      // Node.js
+      const { readFile } = await import("fs/promises");
+      const path = await import("node:path");
+      const romPath = path.resolve(__dirname, `../public/roms/${pathOrFile}.gb`);
+      const buffer = await readFile(romPath as string);
+      return new Uint8Array(buffer);
+    } else {
+      // Browser
+      const file = pathOrFile as File;
+      const arrayBuffer = await file.arrayBuffer();
+      return new Uint8Array(arrayBuffer);
+    }
+  }
 
+
+  async initCart(pathOrFile: string | File) {
+    this.rom = await this.loadROM(pathOrFile);
     const view = new DataView(this.rom.buffer);
     const base = 0x0100; // ROM header base address
 
@@ -68,7 +81,6 @@ export class Cartridge {
 
     this.rom_header = rHeader
   }
-
 
   getBytes = (start: number, end: number) => {
     return this.rom.slice(start, end);
