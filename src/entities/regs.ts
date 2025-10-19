@@ -1,6 +1,7 @@
 import { u16, u8 } from "@/common";
+import { IntegerHelper } from "@/utils/integerHelper";
 
-export class CPU_Registers {
+export class Regs {
     a: u8 = 0
     f: u8 = 0
     b: u8 = 0
@@ -11,7 +12,6 @@ export class CPU_Registers {
     l: u8 = 0
     pc: u16 = 0
     sp: u16 = 0
-
 
 
     get af(): number {
@@ -54,11 +54,27 @@ export class CPU_Registers {
         this.pc++
     }
 
+    get Z() {
+        return IntegerHelper.isBitSet(this.f, 7)
+    }
+
+    // Subtract flag
+    get N() {
+        return IntegerHelper.isBitSet(this.f, 6)
+    }
+
+    get H() {
+        return IntegerHelper.isBitSet(this.f, 5)
+    }
+
+    get C() {
+        return IntegerHelper.isBitSet(this.f, 4)
+    }
+
+
+
+
     toString(): string {
-        const Z = (this.f & 0x80) ? 1 : 0; // Zero
-        const N = (this.f & 0x40) ? 1 : 0; // Subtract
-        const H = (this.f & 0x20) ? 1 : 0; // Half-carry
-        const C = (this.f & 0x10) ? 1 : 0; // Carry
 
         return `A:${this.a.toString(16).padStart(2, "0")} ` +
             `F:${this.f.toString(16).padStart(2, "0")} ` +
@@ -70,6 +86,27 @@ export class CPU_Registers {
             `L:${this.l.toString(16).padStart(2, "0")} ` +
             `PC:${this.pc.toString(16).padStart(4, "0")} ` +
             `SP:${this.sp.toString(16).padStart(4, "0")} ` +
-            `[Z:${Z} N:${N} H:${H} C:${C}]`;
+            `[Z:${this.Z} N:${this.N} H:${this.H} C:${this.C}]`;
+    }
+
+
+    public static is16Reg(reg: RegType): boolean {
+        return reg.length === 2
     }
 }
+
+export type RegType =
+    "a" |
+    "f" |
+    "b" |
+    "c" |
+    "d" |
+    "e" |
+    "h" |
+    "l" |
+    "af" |
+    "bc" |
+    "de" |
+    "hl" |
+    "sp" |
+    "pc"

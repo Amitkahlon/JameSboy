@@ -3,6 +3,7 @@
 
 import { Cartridge } from "./cart";
 import { BETWEEN } from "./common";
+import { IntegerHelper } from "./utils/integerHelper";
 
 // Address ranges reference (GB classic):
 // 0000-3FFF: ROM Bank 0
@@ -26,7 +27,7 @@ export class Bus {
 
     // 0xC000 – 0xDFFF
 
-    read(address: number): number {
+    read8(address: number): number {
         if (address < 0x8000) {
             return this.cart.read(address)
         }
@@ -45,7 +46,14 @@ export class Bus {
         // not from cart is not implemented
     }
 
-    write(address: number, value: number) {
+    read16(address: number) {
+        let low = this.read8(address);
+        let high = this.read8(address);
+
+        return IntegerHelper.makeU16(low, high)
+    }
+
+    write8(address: number, value: number) {
         if (address < 0x8000) {
             this.cart.write(address, value)
         }
@@ -57,10 +65,14 @@ export class Bus {
         else if (BETWEEN(address, 0x8000, 0x9FFF)) {
             this.vram[address - 0x8000] = value;
         }
+    }
 
+    write16(address: number, value: number) {
+        let low = IntegerHelper.getLowByte(value);
+        let high = IntegerHelper.getHighByte(value);
 
-
-        // not from cart is not implemented
+        this.write8(address, low);
+        this.write8(address + 1, high);
     }
 
 }

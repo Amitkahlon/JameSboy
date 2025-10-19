@@ -3,8 +3,8 @@ import { beforeAll, describe, expect, it, test } from 'vitest'
 import path from 'path';
 import { readFile } from 'fs/promises';
 import { fileURLToPath } from 'url';
-import { romTypeName, } from '@/entities/ROM_TYPES';
-import { licCodeeName } from '@/entities/LIC_CODE';
+import { romTypeName, } from '@/entities/rom_typs';
+import { licCodeeName } from '@/entities/lic_codes';
 import { CPU } from '@/cpu';
 import { Bus } from '@/bus';
 import { Emu } from '@/emu';

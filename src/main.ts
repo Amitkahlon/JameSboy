@@ -1,5 +1,102 @@
+import { Console } from "console";
+import { u8 } from "./common";
 import { Emu } from "./emu";
+import { Regs } from "./entities/regs";
 
+let context: Emu;
+let debugMode = true
+let gameFile: File
+
+const debugBtn = document.getElementById("btn-debug") as HTMLButtonElement;
+const stepBtn = document.getElementById("step") as HTMLButtonElement
+const resetBtn = document.getElementById("reset") as HTMLButtonElement
+
+resetBtn.addEventListener("click", () => {
+  context.terminated = true
+
+  drawUI(new Regs())
+  initGame()
+
+  console.clear()
+  console.log("~Gameboy reseted~")
+})
+
+debugBtn.addEventListener("click", () => {
+  debugMode = !debugMode;
+
+  debugBtn.setAttribute('aria-pressed', String(debugMode));
+  debugBtn.textContent = debugMode ? 'Debug: ON' : 'Debug: OFF';
+
+  if (!debugMode) {
+    stepBtn.disabled = true
+  } else {
+    stepBtn.disabled = false
+  }
+})
+
+async function stepClick() {
+  await context.emu_run_step()
+}
+
+stepBtn.addEventListener("click", stepClick)
+
+// format helpers
+const hx8 = v => '0x' + (v & 0xFF).toString(16).toUpperCase().padStart(2, '0');
+const hx16 = v => '0x' + (v & 0xFFFF).toString(16).toUpperCase().padStart(4, '0');
+
+// Set a single register cell by id (expects hex string already or number)
+function setReg(id, val, is16 = false) {
+  const el = document.getElementById(id);
+  if (!el) return;
+
+  debugger
+  const newText = typeof val === 'number' ? (is16 ? hx16(val) : hx8(val)) : val;
+  const oldText = el.textContent;
+
+  // if register changed
+  if (newText !== oldText) {
+    el.style.color = "red"
+  } else {
+    el.style.color = null
+  }
+
+  el.textContent = newText;
+}
+
+
+// Toggle one flag badge
+function setFlag(id, on) {
+  const el = document.getElementById(id);
+  if (!el) return;
+  el.classList.toggle('on', on);
+  el.classList.toggle('off', !on);
+}
+
+const drawUI = (regs: Regs) => {
+  setReg('reg-a', regs.a)
+  setReg('reg-f', regs.f)
+  setReg('reg-b', regs.b)
+  setReg('reg-c', regs.c)
+  setReg('reg-d', regs.d)
+  setReg('reg-e', regs.e)
+  setReg('reg-h', regs.h)
+  setReg('reg-l', regs.l)
+  setReg('reg-pc', regs.pc, true)
+  setReg('reg-sp', regs.sp, true)
+  setFlag('flag-z', regs.Z)
+  setFlag('flag-n', regs.N)
+  setFlag('flag-h', regs.H)
+  setFlag('flag-c', regs.C)
+}
+
+const initGame = async () => {
+  context = new Emu(drawUI)
+
+  await context.insertCart(gameFile)
+  if (!debugMode) {
+    await context.emu_run()
+  }
+}
 
 (async () => {
   const canvas = document.getElementById("screen") as HTMLCanvasElement;
@@ -22,23 +119,17 @@ import { Emu } from "./emu";
   romInput.addEventListener("change", async (event) => {
     if (!romInput.files || romInput.files.length === 0) return;
 
-    const file = romInput.files[0];
-    console.log("Selected file:", file.name);
+    gameFile = romInput.files[0];
 
-    // קריאה כ־ArrayBuffer (חשוב כי זה בינארי, לא טקסט)
-    const arrayBuffer = await file.arrayBuffer()
+    console.log("Selected file:", gameFile.name);
 
-    const context = new Emu()
-
-    await context.insertCart(file)
-    await context.emu_run()
-
+    await initGame()
   });
-
-  // const romName = `dmg-acid2`
 
 
 })()
+
+
 
 
 
