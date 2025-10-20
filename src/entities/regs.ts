@@ -1,5 +1,5 @@
 import { u16, u8 } from "@/common";
-import { IntegerHelper } from "@/utils/integerHelper";
+import { IntUtils } from "@/utils/int_utils";
 
 export class Regs {
     a: u8 = 0
@@ -54,21 +54,24 @@ export class Regs {
         this.pc++
     }
 
+    //zero flag
     get Z() {
-        return IntegerHelper.isBitSet(this.f, 7)
+        return IntUtils.isBitSet(this.f, 7)
     }
 
     // Subtract flag
     get N() {
-        return IntegerHelper.isBitSet(this.f, 6)
+        return IntUtils.isBitSet(this.f, 6)
     }
 
+    //half carry flag
     get H() {
-        return IntegerHelper.isBitSet(this.f, 5)
+        return IntUtils.isBitSet(this.f, 5)
     }
 
+    // carry flag
     get C() {
-        return IntegerHelper.isBitSet(this.f, 4)
+        return IntUtils.isBitSet(this.f, 4)
     }
 
 

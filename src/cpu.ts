@@ -4,7 +4,7 @@ import { Emu } from "./emu"
 import { AddrMode, CondType, Instruction, InType } from "./entities/instruction"
 import { InstructionTable } from "./entities/instructionTable"
 import { Regs } from "./entities/regs"
-import { IntegerHelper } from "./utils/integerHelper"
+import { IntUtils } from "./utils/int_utils"
 
 const instructionTable = new InstructionTable()
 
@@ -13,12 +13,13 @@ export class CPU {
     private mem: Bus
     private fetchedData: u16
     private mem_dest: u16;
-    private dest_is_mem: boolean;
+    private dest_is_mem: boolean = false
     private curr_instruction: Instruction
+    private curr_opcode: u8
     private ctx: Emu
     private halted: boolean
     private stepping: boolean;
-    private ime: boolean
+    private ime: boolean = false
     private ie_register: u8
 
 
@@ -49,6 +50,7 @@ export class CPU {
 
             const currPc = this.regs.pc
             const opcode = this.fetch()
+            this.curr_opcode = opcode
             const currInstruction = this.decode(opcode)
 
 
@@ -91,7 +93,7 @@ export class CPU {
             case "AM_R_D16":
                 let low = this.fetch()
                 let high = this.fetch()
-                this.fetchedData = IntegerHelper.makeU16(low, high)
+                this.fetchedData = IntUtils.makeU16(low, high)
                 break;
             case "AM_MR_R":
                 this.dest_is_mem = true
@@ -111,7 +113,7 @@ export class CPU {
                 this.dest_is_mem = true
                 low = this.fetch()
                 high = this.fetch()
-                this.mem_dest = IntegerHelper.makeU16(low, high)
+                this.mem_dest = IntUtils.makeU16(low, high)
                 this.fetchedData = this.regs[this.curr_instruction.reg_2]
                 break;
             case "AM_R_MR":
@@ -139,7 +141,7 @@ export class CPU {
             case "AM_R_A16":
                 low = this.fetch()
                 high = this.fetch()
-                addr = IntegerHelper.makeU16(low, high)
+                addr = IntUtils.makeU16(low, high)
                 this.fetchedData = this.mem.read8(addr);
                 break;
 
@@ -157,7 +159,7 @@ export class CPU {
     private execute(): boolean {
         const instructionProc: () => any = this.instructionProcesses[this.curr_instruction.type]
         if (!instructionProc) {
-            console.log("does not know how to process this command yet!")
+            console.log(`does not know how to process this command yet!, Opcode: ${this.curr_opcode.toString(16)}`)
             return false
         }
 
@@ -191,8 +193,10 @@ export class CPU {
         if (this.dest_is_mem) {
             if (Regs.is16Reg(ins.reg_2)) {
                 this.mem.write16(this.mem_dest, this.fetchedData)
+                this.ctx.addCycles(2)
             } else {
                 this.mem.write8(this.mem_dest, this.fetchedData)
+                this.ctx.addCycles(1)
             }
 
             return
@@ -201,6 +205,7 @@ export class CPU {
         if (ins.mode === "AM_HL_SPR") {
             this.regs.hl = (this.regs.sp + this.fetchedData) & 0xFFFF
 
+            this.ctx.addCycles(2)
             return
         }
 
@@ -224,15 +229,15 @@ export class CPU {
 
 
     public check_cond() {
-        const z = this.regs.Z
-        const c = this.regs.c
+        const zFlag = this.regs.Z
+        const CFlag = this.regs.C
 
         switch (this.curr_instruction.cond) {
             case "CT_NONE": return true
-            case "CT_C": return c
-            case "CT_NC": return !c
-            case "CT_NZ": return !z
-            case "CT_Z": return z
+            case "CT_C": return CFlag
+            case "CT_NC": return !CFlag
+            case "CT_NZ": return !zFlag
+            case "CT_Z": return zFlag
         }
 
         return false

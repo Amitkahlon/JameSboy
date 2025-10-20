@@ -3,7 +3,7 @@
 
 import { Cartridge } from "./cart";
 import { BETWEEN } from "./common";
-import { IntegerHelper } from "./utils/integerHelper";
+import { IntUtils } from "./utils/int_utils";
 
 // Address ranges reference (GB classic):
 // 0000-3FFF: ROM Bank 0
@@ -50,7 +50,7 @@ export class Bus {
         let low = this.read8(address);
         let high = this.read8(address);
 
-        return IntegerHelper.makeU16(low, high)
+        return IntUtils.makeU16(low, high)
     }
 
     write8(address: number, value: number) {
@@ -68,8 +68,8 @@ export class Bus {
     }
 
     write16(address: number, value: number) {
-        let low = IntegerHelper.getLowByte(value);
-        let high = IntegerHelper.getHighByte(value);
+        let low = IntUtils.getLowByte(value);
+        let high = IntUtils.getHighByte(value);
 
         this.write8(address, low);
         this.write8(address + 1, high);
