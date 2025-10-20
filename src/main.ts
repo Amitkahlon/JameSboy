@@ -49,7 +49,6 @@ function setReg(id, val, is16 = false) {
   const el = document.getElementById(id);
   if (!el) return;
 
-  debugger
   const newText = typeof val === 'number' ? (is16 ? hx16(val) : hx8(val)) : val;
   const oldText = el.textContent;
 
