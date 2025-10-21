@@ -4,7 +4,7 @@ import { CPU } from "./cpu"
 import { Regs } from "./entities/regs"
 
 export class Emu {
-    cpu: CPU = new CPU(new Bus(), this)
+    cpu: CPU = new CPU(new Bus(this), this)
 
     paused: boolean
     running: boolean

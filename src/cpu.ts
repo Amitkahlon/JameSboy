@@ -3,7 +3,7 @@ import { u16, u8 } from "./common"
 import { Emu } from "./emu"
 import { AddrMode, CondType, Instruction, InType } from "./entities/instruction"
 import { InstructionTable } from "./entities/instructionTable"
-import { Regs } from "./entities/regs"
+import { Regs, RegType } from "./entities/regs"
 import { IntUtils } from "./utils/int_utils"
 
 const instructionTable = new InstructionTable()
@@ -42,7 +42,7 @@ export class CPU {
         return this.curr_instruction
     }
 
-    cpu_step(): boolean {
+    public cpu_step(): boolean {
         if (!this.halted) {
             //reset values, maybe use this only when debugging
             this.fetchedData = 0
@@ -84,36 +84,28 @@ export class CPU {
             case "AM_IMP":
                 break;
             case "AM_R_D8":
-                this.fetchedData = this.fetch()
+                this.fetch8bitImmediate()
                 break;
             case "AM_R":
                 this.fetchedData = this.regs[this.curr_instruction.reg_1]
                 break;
             case "AM_D16":
             case "AM_R_D16":
-                let low = this.fetch()
-                let high = this.fetch()
-                this.fetchedData = IntUtils.makeU16(low, high)
+                this.fetch16bitImmediate()
                 break;
             case "AM_MR_R":
-                this.dest_is_mem = true
-                this.mem_dest = this.regs[this.curr_instruction.reg_1]
+                this.setMemDestToReg()
                 break;
             case "AM_HLI_R":
             case "AM_HLD_R":
-                this.dest_is_mem = true
-                this.mem_dest = this.regs[this.curr_instruction.reg_1]
+                this.setMemDestToReg()
                 break;
             case "AM_MR_D8":
-                this.dest_is_mem = true
-                this.fetchedData = this.fetch()
-                this.mem_dest = this.regs[this.curr_instruction.reg_1]
+                this.fetch8bitImmediate()
+                this.setMemDestToReg()
                 break;
             case "AM_A16_R":
-                this.dest_is_mem = true
-                low = this.fetch()
-                high = this.fetch()
-                this.mem_dest = IntUtils.makeU16(low, high)
+                this.fetchMemDest()
                 this.fetchedData = this.regs[this.curr_instruction.reg_2]
                 break;
             case "AM_R_MR":
@@ -139,10 +131,7 @@ export class CPU {
                 this.fetchedData = signed
                 break;
             case "AM_R_A16":
-                low = this.fetch()
-                high = this.fetch()
-                addr = IntUtils.makeU16(low, high)
-                this.fetchedData = this.mem.read8(addr);
+                this.fetchFromMem()
                 break;
 
             default:
@@ -152,6 +141,44 @@ export class CPU {
                 break;
         }
     }
+
+
+    private fetch16bit(): u16 {
+        let low = this.fetch()
+        let high = this.fetch()
+        return IntUtils.makeU16(low, high)
+    }
+
+    private fetch8bitImmediate() {
+        this.fetchedData = this.fetch()
+    }
+
+    private fetch16bitImmediate() {
+        const immediate = this.fetch16bit()
+        this.fetchedData = immediate
+    }
+
+    private fetchMemDest() {
+        this.dest_is_mem = true
+        const addr = this.fetch16bit()
+        this.mem_dest = addr
+    }
+
+    private fetchFromMem() {
+        const addr = this.fetch16bit()
+        this.fetchedData = this.mem.read8(addr)
+    }
+
+
+    // private fetchDataFromRegister(reg: RegType) {
+    //     this.fetchedData = this.regs[reg]
+    // }
+
+    private setMemDestToReg() {
+        this.dest_is_mem = true
+        this.mem_dest = this.regs[this.curr_instruction.reg_1]
+    }
+
 
 
 
@@ -193,10 +220,8 @@ export class CPU {
         if (this.dest_is_mem) {
             if (Regs.is16Reg(ins.reg_2)) {
                 this.mem.write16(this.mem_dest, this.fetchedData)
-                this.ctx.addCycles(2)
             } else {
                 this.mem.write8(this.mem_dest, this.fetchedData)
-                this.ctx.addCycles(1)
             }
 
             return
@@ -205,10 +230,14 @@ export class CPU {
         if (ins.mode === "AM_HL_SPR") {
             this.regs.hl = (this.regs.sp + this.fetchedData) & 0xFFFF
 
-            this.ctx.addCycles(2)
+            this.ctx.addCycles(1)
             return
         }
 
+
+        if (Regs.is16Reg(ins.reg_1)) {
+            
+        }
 
         this.regs[ins.reg_1] = this.fetchedData
     }

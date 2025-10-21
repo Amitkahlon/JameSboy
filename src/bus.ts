@@ -3,6 +3,7 @@
 
 import { Cartridge } from "./cart";
 import { BETWEEN } from "./common";
+import { Emu } from "./emu";
 import { IntUtils } from "./utils/int_utils";
 
 // Address ranges reference (GB classic):
@@ -24,10 +25,15 @@ export class Bus {
     private wram: Uint8Array = new Uint8Array(0x2000); // 8KB Work RAM
     private vram: Uint8Array = new Uint8Array(0x2000); // 8KB VRAM
 
+    constructor(private ctx: Emu) {
+
+    }
 
     // 0xC000 – 0xDFFF
 
     read8(address: number): number {
+        this.ctx.addCycles(1)
+
         if (address < 0x8000) {
             return this.cart.read(address)
         }
