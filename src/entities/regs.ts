@@ -2,14 +2,63 @@ import { u16, u8 } from "@/common";
 import { IntUtils } from "@/utils/int_utils";
 
 export class Regs {
-    a: u8 = 0
-    f: u8 = 0
-    b: u8 = 0
-    c: u8 = 0
-    d: u8 = 0
-    e: u8 = 0
-    h: u8 = 0
-    l: u8 = 0
+    private _a: u8 = 0;
+    private _f: u8 = 0;
+    private _b: u8 = 0;
+    private _c: u8 = 0;
+    private _d: u8 = 0;
+    private _e: u8 = 0;
+    private _h: u8 = 0;
+    private _l: u8 = 0;
+
+    public get a(): u8 {
+        return this._a;
+    }
+    public set a(value: u8) {
+        this._a = IntUtils.toU8(value);
+    }
+    public get f(): u8 {
+        return this._f;
+    }
+    public set f(value: u8) {
+        this._f = IntUtils.toU8(value);
+    }
+    public get b(): u8 {
+        return this._b;
+    }
+    public set b(value: u8) {
+        this._b = IntUtils.toU8(value);
+    }
+    public get c(): u8 {
+        return this._c;
+    }
+    public set c(value: u8) {
+        this._c = IntUtils.toU8(value);
+    }
+    public get d(): u8 {
+        return this._d;
+    }
+    public set d(value: u8) {
+        this._d = IntUtils.toU8(value);
+    }
+    public get e(): u8 {
+        return this._e;
+    }
+    public set e(value: u8) {
+        this._e = IntUtils.toU8(value);
+    }
+    public get h(): u8 {
+        return this._h;
+    }
+    public set h(value: u8) {
+        this._h = IntUtils.toU8(value);
+    }
+    public get l(): u8 {
+        return this._l;
+    }
+    public set l(value: u8) {
+        this._l = IntUtils.toU8(value);
+    }
     pc: u16 = 0
     sp: u16 = 0
 
@@ -50,30 +99,57 @@ export class Regs {
         this.l = value & 0xFF;
     }
 
+
     public incrementPC() {
         this.pc++
     }
 
-    //zero flag
+    /**
+        zero flag
+     */
     get Z() {
         return IntUtils.isBitSet(this.f, 7)
     }
 
-    // Subtract flag
+    set Z(val: boolean) {
+        this.f = IntUtils.setBit(this.f, 7, val)
+    }
+
+
+    /**
+     * Subtract flag
+     */
     get N() {
         return IntUtils.isBitSet(this.f, 6)
     }
 
-    //half carry flag
+    set N(val: boolean) {
+        this.f = IntUtils.setBit(this.f, 6, val)
+    }
+
+
+    /**
+        half carry flag
+    */
     get H() {
         return IntUtils.isBitSet(this.f, 5)
     }
 
-    // carry flag
+
+    set H(val: boolean) {
+        this.f = IntUtils.setBit(this.f, 5, val)
+    }
+
+    /**
+     carry flag
+    */
     get C() {
         return IntUtils.isBitSet(this.f, 4)
     }
 
+    set C(val: boolean) {
+        this.f = IntUtils.setBit(this.f, 5, val)
+    }
 
 
 

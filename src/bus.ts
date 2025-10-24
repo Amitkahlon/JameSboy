@@ -2,7 +2,7 @@
 // Minimal Game Boy Memory Map skeleton (MBC0) with a simple bus.
 
 import { Cartridge } from "./cart";
-import { BETWEEN } from "./common";
+import { BETWEEN, u8 } from "./common";
 import { Emu } from "./emu";
 import { IntUtils } from "./utils/int_utils";
 
@@ -31,8 +31,7 @@ export class Bus {
 
     // 0xC000 – 0xDFFF
 
-    read8(address: number): number {
-        this.ctx.addCycles(1)
+    read8(address: number): u8 {
 
         if (address < 0x8000) {
             return this.cart.read(address)

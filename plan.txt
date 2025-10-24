@@ -1,0 +1,2 @@
+
+instruction are map opcode [0xXX] to functions that handle fetching and executing,  
