@@ -5,7 +5,7 @@ import { Regs, RegType } from "@/entities/regs";
 import { IntUtils } from "@/utils/int_utils";
 
 
-class LoadProcesses {
+export class LoadProcesses {
 
     constructor(private regs: Regs, private mem: Bus, private cpu: CPU) {
 
@@ -21,7 +21,7 @@ class LoadProcesses {
     }
 
     public process_ld_r8_d8 = (destReg: RegType): boolean => {
-        this.regs[destReg] = this.cpu.fetch8bit()
+        this.regs[destReg] = this.cpu.fetch()
         return true
     }
 
@@ -100,7 +100,7 @@ class LoadProcesses {
 
 
     public process_ld_HL_SPR = (): boolean => {
-        const unsigned8 = this.cpu.fetch8bit();
+        const unsigned8 = this.cpu.fetch();
         const signed8 = IntUtils.toSigned(unsigned8)
 
         this.regs.hl = IntUtils.toU16((this.regs.sp + signed8))
@@ -153,7 +153,7 @@ class LoadProcesses {
 
     // LDH (a8), A   → [0xFF00 + a8] = A
     public process_ldh_a8_ra = (): boolean => {
-        const offset = this.cpu.fetch8bit();          // read immediate 8-bit value
+        const offset = this.cpu.fetch();          // read immediate 8-bit value
         const addr = 0xFF00 + offset;                 // build IO address
         this.mem.write8(addr, this.regs.a);           // store A into [0xFF00 + a8]
         return true;
@@ -161,10 +161,20 @@ class LoadProcesses {
 
     // LDH A, (a8)   → A = [0xFF00 + a8]
     public process_ldh_ra_a8 = (): boolean => {
-        const offset = this.cpu.fetch8bit();          // read immediate 8-bit value
+        const offset = this.cpu.fetch();          // read immediate 8-bit value
         const addr = 0xFF00 + offset;                 // build IO address
         this.regs.a = this.mem.read8(addr);           // load from [0xFF00 + a8] into A
         return true;
     };
+
+
+    public process_ld_hl_d8 = (): boolean => {
+        const immediate = this.cpu.fetch();
+        const hl = this.regs.hl;
+
+        this.mem.write8(hl, immediate);
+        
+        return true;
+    }
 
 }

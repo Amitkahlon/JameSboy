@@ -2,8 +2,7 @@ import { Bus } from "@/bus";
 import { CPU } from "@/cpu";
 import { Regs, RegType } from "@/entities/regs";
 
-// Implements CB-prefixed operations: RLC, RRC, RL, RR, SLA, SRA, SRL, SWAP, BIT, RES, SET
-class CBProcesses {
+export class CBProcesses {
     constructor(private regs: Regs, private mem: Bus, private cpu: CPU) { }
 
     // -------------------------

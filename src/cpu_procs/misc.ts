@@ -8,7 +8,7 @@ import { Regs, RegType } from "@/entities/regs";
 import { IntUtils } from "@/utils/int_utils";
 
 
-class MiscProcesses {
+export class MiscProcesses {
 
     constructor(private regs: Regs, private mem: Bus, private cpu: CPU) {
 
@@ -39,7 +39,7 @@ class MiscProcesses {
 
 
     public process_prefixCB = (): boolean => {
-        const opcode = this.cpu.fetch8bit();
+        const opcode = this.cpu.fetch();
         
 
 

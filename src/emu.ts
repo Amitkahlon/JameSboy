@@ -76,7 +76,5 @@ export class Emu {
     }
 
 
-    addCycles(cycles: number) {
-        console.log("not implemented");
-    }
+
 }

@@ -3,56 +3,56 @@ import { RegType } from "./regs";
 
 
 // // --- Instruction types ---
-// export type InType =
-//     | "NULL"
-//     | "IN_NONE"
-//     | "IN_NOP"
-//     | "IN_LD"
-//     | "IN_INC"
-//     | "IN_DEC"
-//     | "IN_RLCA"
-//     | "IN_ADD"
-//     | "IN_RRCA"
-//     | "IN_STOP"
-//     | "IN_RLA"
-//     | "IN_JR"
-//     | "IN_RRA"
-//     | "IN_DAA"
-//     | "IN_CPL"
-//     | "IN_SCF"
-//     | "IN_CCF"
-//     | "IN_HALT"
-//     | "IN_ADC"
-//     | "IN_SUB"
-//     | "IN_SBC"
-//     | "IN_AND"
-//     | "IN_XOR"
-//     | "IN_OR"
-//     | "IN_CP"
-//     | "IN_POP"
-//     | "IN_JP"
-//     | "IN_PUSH"
-//     | "IN_RET"
-//     | "IN_CB"
-//     | "IN_CALL"
-//     | "IN_RETI"
-//     | "IN_LDH"
-//     | "IN_JPHL"
-//     | "IN_DI"
-//     | "IN_EI"
-//     | "IN_RST"
-//     | "IN_ERR"
-//     | "IN_RLC"
-//     | "IN_RRC"
-//     | "IN_RL"
-//     | "IN_RR"
-//     | "IN_SLA"
-//     | "IN_SRA"
-//     | "IN_SWAP"
-//     | "IN_SRL"
-//     | "IN_BIT"
-//     | "IN_RES"
-//     | "IN_SET";
+export type InType =
+    | "NULL"
+    | "IN_NONE"
+    | "IN_NOP"
+    | "IN_LD"
+    | "IN_INC"
+    | "IN_DEC"
+    | "IN_RLCA"
+    | "IN_ADD"
+    | "IN_RRCA"
+    | "IN_STOP"
+    | "IN_RLA"
+    | "IN_JR"
+    | "IN_RRA"
+    | "IN_DAA"
+    | "IN_CPL"
+    | "IN_SCF"
+    | "IN_CCF"
+    | "IN_HALT"
+    | "IN_ADC"
+    | "IN_SUB"
+    | "IN_SBC"
+    | "IN_AND"
+    | "IN_XOR"
+    | "IN_OR"
+    | "IN_CP"
+    | "IN_POP"
+    | "IN_JP"
+    | "IN_PUSH"
+    | "IN_RET"
+    | "IN_CB"
+    | "IN_CALL"
+    | "IN_RETI"
+    | "IN_LDH"
+    | "IN_JPHL"
+    | "IN_DI"
+    | "IN_EI"
+    | "IN_RST"
+    | "IN_ERR"
+    | "IN_RLC"
+    | "IN_RRC"
+    | "IN_RL"
+    | "IN_RR"
+    | "IN_SLA"
+    | "IN_SRA"
+    | "IN_SWAP"
+    | "IN_SRL"
+    | "IN_BIT"
+    | "IN_RES"
+    | "IN_SET";
 
 // --- Conditions ---
 export type CondType = "NULL" | "CT_NONE" | "CT_NZ" | "CT_Z" | "CT_NC" | "CT_C";
@@ -62,12 +62,10 @@ export type CondType = "NULL" | "CT_NONE" | "CT_NZ" | "CT_Z" | "CT_NC" | "CT_C";
 
 
 
-export type Cycles = number | [notTaken: number, taken: number]; 
+export type Cycles = number
 
 export interface Instruction {
-    reg_1?: RegType;
-    reg_2?: RegType;
-    cond?: CondType;
-    param?: u8; // immediate 8-bit parameter when relevant
+    handler: () => boolean
+    type: InType
     cycles: Cycles;
 }

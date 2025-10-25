@@ -9,7 +9,7 @@ import { Regs, RegType } from "@/entities/regs";
 import { IntUtils } from "@/utils/int_utils";
 
 
-class CallsJumpProcesses {
+export class CallsJumpProcesses {
 
     constructor(private regs: Regs, private mem: Bus, private cpu: CPU) {
 
@@ -66,25 +66,25 @@ class CallsJumpProcesses {
     public process_jr = (cond: CondType): boolean => {
         if (!this.check_cond(cond)) return true
 
-        const offsetRaw = this.cpu.fetch8bit();
+        const offsetRaw = this.cpu.fetch();
         const offset = IntUtils.toSigned(offsetRaw)
         this.regs.pc = IntUtils.wrapAddress16(this.regs.pc + offset)
 
         return true
     }
 
-public process_rst = (vector: number): boolean => {
-    // Push current PC onto the stack (return address is the next instruction)
-    const pc = this.regs.pc & 0xFFFF;
-    this.regs.sp = (this.regs.sp - 2) & 0xFFFF;
-    this.mem.write16(this.regs.sp, pc); // writes lo at [SP], hi at [SP+1]
+    public process_rst = (vector: number): boolean => {
+        // Push current PC onto the stack (return address is the next instruction)
+        const pc = this.regs.pc & 0xFFFF;
+        this.regs.sp = (this.regs.sp - 2) & 0xFFFF;
+        this.mem.write16(this.regs.sp, pc); // writes lo at [SP], hi at [SP+1]
 
-    // Jump to the fixed vector
-    this.regs.pc = vector & 0xFFFF;
+        // Jump to the fixed vector
+        this.regs.pc = vector & 0xFFFF;
 
-    // Flags are unaffected by RST
-    return true;
-};
+        // Flags are unaffected by RST
+        return true;
+    };
 
 
 

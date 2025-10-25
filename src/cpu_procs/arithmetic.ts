@@ -4,7 +4,7 @@ import { CPU } from "@/cpu";
 import { Regs, RegType } from "@/entities/regs";
 import { IntUtils } from "@/utils/int_utils";
 
-class ArithmeticProcesses {
+export class ArithmeticProcesses {
     constructor(private regs: Regs, private mem: Bus, private cpu: CPU) {
 
     }
@@ -87,6 +87,21 @@ class ArithmeticProcesses {
         return true
     }
 
+    public process_add_16r_16r = (regDest: RegType, regTarget: RegType): boolean => {
+        const destVal = this.regs[regDest];
+        const targetVal = this.regs[regTarget]
+
+        const newVal = destVal + targetVal
+        this.regs[regDest] = IntUtils.toU16(newVal);
+
+        this.regs.N = false
+
+        this.regs.H = ((destVal & 0x0FFF) + (targetVal & 0x0FFF)) > 0x0FFF
+        this.regs.C = destVal + targetVal > 0xFFFF;
+
+        return true
+    }
+
     public process_add_r8_mr = (): boolean => {
         const destVal = this.regs.a
         const targetMemAddr = this.regs.hl
@@ -104,7 +119,7 @@ class ArithmeticProcesses {
     }
 
     public process_add_d8 = (regDest: RegType): boolean => {
-        const immediate: u8 = this.cpu.fetch8bit()
+        const immediate: u8 = this.cpu.fetch()
 
         const old = this.regs[regDest];
         const newRaw = old + immediate;
@@ -119,7 +134,7 @@ class ArithmeticProcesses {
     }
 
     public process_add_sp_sd8 = (): boolean => {
-        const rawByte = this.cpu.fetch8bit()
+        const rawByte = this.cpu.fetch()
         const sp = this.regs.sp & 0xFFFF;
         const offset = IntUtils.toSigned(rawByte); // signed int8 -> int32
 
@@ -189,7 +204,7 @@ class ArithmeticProcesses {
     }
 
     public process_and_d8 = (): boolean => {
-        const immediate = this.cpu.fetch8bit()
+        const immediate = this.cpu.fetch()
         this.regs.a = this.regs.a & immediate
         this.handle_and_flags()
         return true
@@ -224,7 +239,7 @@ class ArithmeticProcesses {
     }
 
     public process_xor_d8 = (): boolean => {
-        const immediate = this.cpu.fetch8bit()
+        const immediate = this.cpu.fetch()
         this.regs.a = this.regs.a ^ immediate
 
         this.handle_xor_flags()
@@ -261,7 +276,7 @@ class ArithmeticProcesses {
     }
 
     public process_or_d8 = (): boolean => {
-        const immediate = this.cpu.fetch8bit()
+        const immediate = this.cpu.fetch()
         this.regs.a = this.regs.a | immediate
 
         this.handle_or_flags()
@@ -305,7 +320,7 @@ class ArithmeticProcesses {
     }
 
     public process_cp_d8 = (): boolean => {
-        const immediate = this.cpu.fetch8bit()
+        const immediate = this.cpu.fetch()
         const a = this.regs.a;
 
         this.regs.Z = immediate === a
@@ -355,7 +370,7 @@ class ArithmeticProcesses {
 
 
     public process_sbc_d8 = (): boolean => {
-        const immediate = this.cpu.fetch8bit()
+        const immediate = this.cpu.fetch()
         const a = this.regs.a;
         const carry = (this.regs.C ? 1 : 0);
         const raw = a - immediate - carry;
@@ -407,7 +422,7 @@ class ArithmeticProcesses {
 
 
     public process_abc_d8 = (): boolean => {
-        const immediate = this.cpu.fetch8bit()
+        const immediate = this.cpu.fetch()
         const a = this.regs.a;
         const carry = (this.regs.C ? 1 : 0);
         this.regs.a = IntUtils.toU8(a + immediate + carry);
@@ -473,6 +488,89 @@ class ArithmeticProcesses {
 
         return true;
     };
+
+    public process_RLCA = (): boolean => {
+        const a = this.regs.a;
+        const carry = (a >> 7) & 0x01; // old bit 7
+
+        const rotated = ((a << 1) | carry) & 0xFF;
+        this.regs.a = rotated;
+
+        // Flags
+        this.regs.Z = false;
+        this.regs.N = false;
+        this.regs.H = false;
+        this.regs.C = carry === 1;
+
+        return true;
+    };
+
+    public process_RLA = (): boolean => {
+        const a = this.regs.a;
+        const oldCarry = this.regs.C ? 1 : 0;
+        const newCarry = (a >> 7) & 0x01;
+
+        const rotated = ((a << 1) | oldCarry) & 0xFF;
+        this.regs.a = rotated;
+
+        this.regs.Z = false;
+        this.regs.N = false;
+        this.regs.H = false;
+        this.regs.C = newCarry === 1;
+
+        return true;
+    };
+
+    public process_RRCA = (): boolean => {
+        const a = this.regs.a;
+        const carry = a & 0x01; // old bit 0
+
+        const rotated = ((a >> 1) | (carry << 7)) & 0xFF;
+        this.regs.a = rotated;
+
+        this.regs.Z = false;
+        this.regs.N = false;
+        this.regs.H = false;
+        this.regs.C = carry === 1;
+
+        return true;
+    };
+
+    public process_SCF = (): boolean => {
+        this.regs.N = false;
+        this.regs.H = false;
+        this.regs.C = true;
+        return true;
+    };
+
+    public process_DAA = (): boolean => {
+        let a = this.regs.a;
+        let adjust = 0;
+        let carry = this.regs.C;
+
+        if (!this.regs.N) {
+            if (this.regs.H || (a & 0x0F) > 0x09) adjust |= 0x06;
+            if (this.regs.C || a > 0x99) {
+                adjust |= 0x60;
+                carry = true;
+            }
+            a = (a + adjust) & 0xFF;
+        } else {
+            if (this.regs.H) adjust |= 0x06;
+            if (this.regs.C) adjust |= 0x60;
+            a = (a - adjust) & 0xFF;
+        }
+
+        this.regs.a = a;
+        this.regs.Z = a === 0;
+        this.regs.H = false;
+        this.regs.C = carry;
+
+        return true;
+    };
+
+
+
 
 
 
