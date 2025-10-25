@@ -162,6 +162,20 @@ export class ArithmeticProcesses {
         return true
     }
 
+    public process_sub_d8 = (): boolean => {
+        const destVal = this.regs.a;
+        const immediate = this.cpu.fetch();
+
+        this.regs.a = IntUtils.toU8(destVal - immediate);
+
+        this.regs.Z = this.regs.a === 0
+        this.regs.N = true
+        this.regs.H = IntUtils.halfBorrowSub8(destVal, immediate)
+        this.regs.C = IntUtils.hasBorrow8(destVal, immediate);
+
+        return true
+    }
+
     public process_sub_r8_mr = (): boolean => {
         const memTarget = this.regs.hl
         const targetVal = this.mem.read8(memTarget);

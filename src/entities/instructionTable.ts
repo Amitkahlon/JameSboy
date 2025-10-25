@@ -262,7 +262,7 @@ export class InstructionTable {
         this.opcodeTable[0xD3] = { type: "IN_NOP", cycles: 4, handler: () => this.miscProcesses.process_nop() }; // invalid
         this.opcodeTable[0xD4] = { type: "IN_CALL", cycles: 24, handler: () => this.callsJumpProcesses.process_call("CT_NC") };
         this.opcodeTable[0xD5] = { type: "IN_PUSH", cycles: 16, handler: () => this.loadProcesses.process_push_r16("de") };
-        this.opcodeTable[0xD6] = { type: "IN_SUB", cycles: 8, handler: () => { /* SUB A,d8 */ /* TODO: process_sub_d8("a") */ return true; } };
+        this.opcodeTable[0xD6] = { type: "IN_SUB", cycles: 8, handler: () => this.arithmeticProcesses.process_sub_d8() };
         this.opcodeTable[0xD7] = { type: "IN_RST", cycles: 16, handler: () => this.callsJumpProcesses.process_rst(0x10) };
         this.opcodeTable[0xD8] = { type: "IN_RET", cycles: 20, handler: () => this.callsJumpProcesses.process_ret("CT_C") };
         this.opcodeTable[0xD9] = { type: "IN_RETI", cycles: 16, handler: () => this.callsJumpProcesses.process_reti() };

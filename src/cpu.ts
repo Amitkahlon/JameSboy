@@ -1,12 +1,10 @@
 import { Bus } from "./bus"
 import { u16, u8 } from "./common"
 import { Emu } from "./emu"
-import { CondType, Instruction, } from "./entities/instruction"
+import { Instruction, } from "./entities/instruction"
 import { InstructionTable } from "./entities/instructionTable"
 import { Regs, RegType } from "./entities/regs"
 import { IntUtils } from "./utils/int_utils"
-
-const instructionTable = new InstructionTable()
 
 export class CPU {
     public regs: Regs
@@ -19,10 +17,10 @@ export class CPU {
 
 
 
-    constructor(mem: Bus, ctx: Emu, instructionTable: InstructionTable) {
+    constructor(mem: Bus, ctx: Emu) {
         this.ctx = ctx
         this.mem = mem
-        this.instructionTable = instructionTable;
+        this.instructionTable = new InstructionTable(this);
         this.regs = new Regs()
 
         this.regs.pc = 0x0100
@@ -36,7 +34,7 @@ export class CPU {
     }
 
     public decode(opcode: u8): Instruction {
-        return instructionTable.get(opcode)
+        return this.instructionTable.get(opcode)
     }
 
     public cpu_step(): boolean {

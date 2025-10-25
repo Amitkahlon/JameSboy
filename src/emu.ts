@@ -1,6 +1,7 @@
 import { Bus } from "./bus"
 import { delay, u8 } from "./common"
 import { CPU } from "./cpu"
+import { InstructionTable } from "./entities/instructionTable"
 import { Regs } from "./entities/regs"
 
 export class Emu {
