@@ -6,6 +6,8 @@ import { ArithmeticProcesses } from "@/cpu_procs/arithmetic";
 import { CallsJumpProcesses } from "@/cpu_procs/calls";
 import { LoadProcesses } from "@/cpu_procs/lsm";
 import { MiscProcesses } from "@/cpu_procs/misc";
+import { Regs } from "./regs";
+import { Bus } from "@/bus";
 
 
 export class InstructionTable {
@@ -20,7 +22,24 @@ export class InstructionTable {
 
 
 
-    constructor(private cpu: CPU) {
+    constructor(cpu: CPU, regs: Regs, mem: Bus) {
+        this.cbProcesses = new CBProcesses(regs, mem);
+        this.miscProcesses = new MiscProcesses(cpu, this.cbProcesses);
+        this.loadProcesses = new LoadProcesses(regs, mem, cpu);
+        this.callsJumpProcesses = new CallsJumpProcesses(regs, mem, cpu);
+        this.arithmeticProcesses = new ArithmeticProcesses(regs, mem, cpu);
+
+
+        this.initTable()
+    }
+
+    public get(opcode: u8): Instruction {
+        return this.opcodeTable[opcode]
+    }
+
+
+    private initTable(): void {
+
         // 0x00–0x0F
         this.opcodeTable[0x00] = { type: "IN_NOP", cycles: 4, handler: () => this.miscProcesses.process_nop() };
         this.opcodeTable[0x01] = { type: "IN_LD", cycles: 12, handler: () => this.loadProcesses.process_ld_16r_d16("bc") };
@@ -309,11 +328,6 @@ export class InstructionTable {
         this.opcodeTable[0xFE] = { type: "IN_CP", cycles: 8, handler: () => this.arithmeticProcesses.process_cp_d8() };
         this.opcodeTable[0xFF] = { type: "IN_RST", cycles: 16, handler: () => this.callsJumpProcesses.process_rst(0x38) };
 
-
-    }
-
-    get(opcode: u8): Instruction {
-        return this.opcodeTable[opcode]
     }
 }
 

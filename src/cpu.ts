@@ -20,8 +20,8 @@ export class CPU {
     constructor(mem: Bus, ctx: Emu) {
         this.ctx = ctx
         this.mem = mem
-        this.instructionTable = new InstructionTable(this);
         this.regs = new Regs()
+        this.instructionTable = new InstructionTable(this, this.regs, mem);
 
         this.regs.pc = 0x0100
         this.regs.a = 0x01
@@ -87,6 +87,6 @@ export class CPU {
     }
 
     private addCycles(cycles: number) {
-        console.log("not implemented");
+        //console.log("not implemented");
     }
 }

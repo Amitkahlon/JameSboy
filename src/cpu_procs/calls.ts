@@ -58,9 +58,19 @@ export class CallsJumpProcesses {
     }
 
     public process_reti = (): boolean => {
-        console.log("Not Implemented Yet")
-        return false
-    }
+        // POP PC (lo then hi) from stack
+        const lo = this.mem.read8(this.regs.sp & 0xFFFF);
+        const hi = this.mem.read8((this.regs.sp + 1) & 0xFFFF);
+        this.regs.sp = (this.regs.sp + 2) & 0xFFFF;
+
+        this.regs.pc = ((hi << 8) | lo) & 0xFFFF;
+
+        // IME ← 1 (enable interrupts immediately)
+        // adjust to your CPU field/method name if different:
+        // e.g., this.cpu.IME = true; or this.cpu.enableInterrupts();
+        this.cpu.ime = true;
+        return true;
+    };
 
 
     public process_jr = (cond: CondType): boolean => {

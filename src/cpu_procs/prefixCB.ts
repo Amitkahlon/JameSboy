@@ -3,7 +3,7 @@ import { CPU } from "@/cpu";
 import { Regs, RegType } from "@/entities/regs";
 
 export class CBProcesses {
-    constructor(private regs: Regs, private mem: Bus, private cpu: CPU) { }
+    constructor(private regs: Regs, private mem: Bus) { }
 
     // -------------------------
     // Helpers
