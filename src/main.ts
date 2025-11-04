@@ -10,6 +10,8 @@ let gameFile: File
 const debugBtn = document.getElementById("btn-debug") as HTMLButtonElement;
 const stepBtn = document.getElementById("step") as HTMLButtonElement
 const resetBtn = document.getElementById("reset") as HTMLButtonElement
+const autoBtn = document.getElementById("auto") as HTMLButtonElement
+
 
 resetBtn.addEventListener("click", () => {
   context.terminated = true
@@ -34,7 +36,17 @@ debugBtn.addEventListener("click", () => {
   }
 })
 
+autoBtn.addEventListener("click", async () => {
+  if (!context) {
+    initGame()
+  }
+  await context.emu_run()
+})
+
 async function stepClick() {
+  if (!context) {
+    initGame()
+  }
   await context.emu_run_step()
 }
 
@@ -92,9 +104,6 @@ const initGame = async () => {
   context = new Emu(drawUI)
 
   await context.insertCart(gameFile)
-  if (!debugMode) {
-    await context.emu_run()
-  }
 }
 
 (async () => {
@@ -115,14 +124,15 @@ const initGame = async () => {
 
   clearScreen();
 
-  romInput.addEventListener("change", async (event) => {
+  // input game selection 
+  romInput.addEventListener("change", (event) => {
     if (!romInput.files || romInput.files.length === 0) return;
 
     gameFile = romInput.files[0];
 
     console.log("Selected file:", gameFile.name);
 
-    await initGame()
+
   });
 
 

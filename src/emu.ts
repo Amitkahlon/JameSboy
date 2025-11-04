@@ -43,8 +43,7 @@ export class Emu {
             if (this.terminated) {
                 return
             }
-
-            await delay(3000)
+            await delay(100)
 
             if (this.paused) {
                 await delay(100)
@@ -64,16 +63,16 @@ export class Emu {
     }
 
 
-    async emu_run_step(): Promise<number> {
+    async emu_run_step(): Promise<void> {
         if (!this.cpu.cpu_step()) {
             console.log("~~cpu stopped~~")
-            return -3
+            return
         }
 
         this.ticks++
 
         this.updateUI(this.cpu.regs)
-        return 0
+        return
     }
 
 

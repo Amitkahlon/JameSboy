@@ -80,6 +80,7 @@ export class Cartridge {
     };
 
     this.rom_header = rHeader
+
   }
 
   getBytes = (start: number, end: number) => {
