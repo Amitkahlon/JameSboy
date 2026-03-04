@@ -45,7 +45,7 @@ autoBtn.addEventListener("click", async () => {
 
 async function stepClick() {
   if (!context) {
-    initGame()
+    await initGame()
   }
   await context.emu_run_step()
 }
@@ -132,7 +132,7 @@ const initGame = async () => {
 
     console.log("Selected file:", gameFile.name);
 
-
+    
   });
 
 
