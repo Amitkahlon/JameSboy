@@ -38,7 +38,7 @@ debugBtn.addEventListener("click", () => {
 
 autoBtn.addEventListener("click", async () => {
   if (!context) {
-    initGame()
+    await initGame()
   }
   await context.emu_run()
 })
