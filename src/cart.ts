@@ -23,6 +23,7 @@ export class Cartridge {
 
   public rom: Uint8Array
   rom_header: RomHeader
+  romBank: number = 1;
 
   private async loadROM(pathOrFile: string | File): Promise<Uint8Array> {
     if (typeof pathOrFile === 'string') {
@@ -89,10 +90,32 @@ export class Cartridge {
 
   read(address: number): number {
     return this.rom[address];
+    // ROM Bank 0 (Fixed at 0x0000 - 0x3FFF)
+    if (address < 0x4000) {
+      return this.rom[address];
+    }
+
+    // ROM Bank N (Switchable at 0x4000 - 0x7FFF)
+    // We calculate the offset inside the bank (address - 0x4000)
+    // And add it to the start of the selected bank (this.romBank * 16KB)
+    return this.rom[(address - 0x4000) + (this.romBank * 0x4000)];
   }
 
   write(address: number, value: number) {
-    throw new Error("Method not implemented.");
+    // Writing to ROM addresses (0x0000-0x7FFF) is used to control the MBC (Memory Bank Controller).
+    // It does NOT change the content of the ROM.
+    // For now, we ignore these writes to allow games to run without crashing.
+    // TODO: Implement MBC logic (switching banks, enabling RAM, etc.)
+    // MBC1 Implementation (Basic ROM Banking)
+    // Writing to 0x2000 - 0x3FFF selects the lower 5 bits of the ROM Bank Number
+    if (address >= 0x2000 && address <= 0x3FFF) {
+      let bank = value & 0x1F; // Mask to 5 bits
+      if (bank === 0) {
+        bank = 1; // MBC1 translates bank 0 to bank 1
+      }
+      this.romBank = bank;
+      // Note: Full MBC1 implementation would handle upper bits in 0x4000-0x5FFF
+    }
   }
 
   // Read ASCII string from a byte range

@@ -26,6 +26,8 @@ export class Bus {
     private vram: Uint8Array = new Uint8Array(0x2000); // 8KB VRAM
     private hram: Uint8Array = new Uint8Array(0x80);   // HRAM (High RAM)
     private io: Uint8Array = new Uint8Array(0x80);     // IO Registers
+    private ie: u8 = 0;                                // Interrupt Enable Register
+    public onSerialWrite: ((value: number) => void) | undefined;
 
     constructor(private ctx: Emu) {
 
@@ -55,6 +57,10 @@ export class Bus {
             return this.hram[address - 0xFF80]
         }
 
+        else if (address === 0xFFFF) {
+            return this.ie;
+        }
+
         // 0x8000 – 0x9FFF → VRAM
 
         return 0xFF
@@ -82,11 +88,20 @@ export class Bus {
         }
 
         else if (BETWEEN(address, 0xFF00, 0xFF7F)) {
+            if (address === 0xFF02 && value === 0x81) {
+                if (this.onSerialWrite) {
+                    this.onSerialWrite(this.io[1]);
+                }
+            }
             this.io[address - 0xFF00] = value;
         }
 
         else if (BETWEEN(address, 0xFF80, 0xFFFE)) {
             this.hram[address - 0xFF80] = value;
+        }
+
+        else if (address === 0xFFFF) {
+            this.ie = value;
         }
     }
 
@@ -96,6 +111,15 @@ export class Bus {
 
         this.write8(address, low);
         this.write8(address + 1, high);
+    }
+
+    /**
+     * Helper to request an interrupt by setting the corresponding bit in IF (0xFF0F)
+     * 0: V-Blank, 1: LCD, 2: Timer, 3: Serial, 4: Joypad
+     */
+    requestInterrupt(bit: number) {
+        const currentIF = this.io[0x0F]; // Direct access to IO array for speed, 0xFF0F - 0xFF00 = 0x0F
+        this.io[0x0F] = currentIF | (1 << bit);
     }
 
 }
