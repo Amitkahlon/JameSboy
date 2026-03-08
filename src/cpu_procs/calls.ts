@@ -17,8 +17,8 @@ export class CallsJumpProcesses {
 
 
     public process_call = (cond: CondType): boolean => {
+        const addr = this.cpu.fetch16bit()
         if (this.check_cond(cond)) {
-            const addr = this.cpu.fetch16bit()
             this.regs.sp -= 2
             this.mem.write16(this.regs.sp, this.regs.pc)
             this.regs.pc = addr
@@ -28,8 +28,8 @@ export class CallsJumpProcesses {
     }
 
     public process_jp = (cond: CondType): boolean => {
+        const addr = this.cpu.fetch16bit()
         if (this.check_cond(cond)) {
-            const addr = this.cpu.fetch16bit()
             this.regs.pc = addr
         }
 
@@ -74,11 +74,12 @@ export class CallsJumpProcesses {
 
 
     public process_jr = (cond: CondType): boolean => {
-        if (!this.check_cond(cond)) return true
-
         const offsetRaw = this.cpu.fetch();
         const offset = IntUtils.toSigned(offsetRaw)
-        this.regs.pc = IntUtils.wrapAddress16(this.regs.pc + offset)
+
+        if (this.check_cond(cond)) {
+            this.regs.pc = IntUtils.wrapAddress16(this.regs.pc + offset)
+        }
 
         return true
     }
