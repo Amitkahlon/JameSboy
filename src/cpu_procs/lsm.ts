@@ -107,8 +107,8 @@ export class LoadProcesses {
         this.regs.Z = false
         this.regs.N = false
 
-        this.regs.H = IntUtils.hasHalfCarry8(this.regs.sp, signed8)
-        this.regs.C = IntUtils.hasCarry8(this.regs.sp, signed8)
+        this.regs.H = ((this.regs.sp & 0xF) + (unsigned8 & 0xF)) > 0xF
+        this.regs.C = ((this.regs.sp & 0xFF) + (unsigned8 & 0xFF)) > 0xFF
 
         return true
     }

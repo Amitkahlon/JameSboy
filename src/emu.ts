@@ -23,7 +23,7 @@ export class Emu {
     |Timer|
      */
 
-    constructor(private updateUI: (regs: Regs) => void) {
+    constructor(private updateUI: (regs: Regs, oldRegs?: Regs) => void) {
         this.paused = false
         this.running = false
         this.ticks = 0
@@ -64,6 +64,8 @@ export class Emu {
 
 
     async emu_run_step(): Promise<void> {
+        const oldRegs = this.cpu.regs;
+        
         if (!this.cpu.cpu_step()) {
             console.log("~~cpu stopped~~")
             return
@@ -71,7 +73,7 @@ export class Emu {
 
         this.ticks++
 
-        this.updateUI(this.cpu.regs)
+        this.updateUI(this.cpu.regs, oldRegs)
         return
     }
 

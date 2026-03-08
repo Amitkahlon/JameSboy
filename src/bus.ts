@@ -24,6 +24,8 @@ export class Bus {
     cart: Cartridge = new Cartridge()
     private wram: Uint8Array = new Uint8Array(0x2000); // 8KB Work RAM
     private vram: Uint8Array = new Uint8Array(0x2000); // 8KB VRAM
+    private hram: Uint8Array = new Uint8Array(0x80);   // HRAM (High RAM)
+    private io: Uint8Array = new Uint8Array(0x80);     // IO Registers
 
     constructor(private ctx: Emu) {
 
@@ -45,6 +47,14 @@ export class Bus {
             return this.vram[address - 0x8000]
         }
 
+        else if (BETWEEN(address, 0xFF00, 0xFF7F)) {
+            return this.io[address - 0xFF00]
+        }
+
+        else if (BETWEEN(address, 0xFF80, 0xFFFE)) {
+            return this.hram[address - 0xFF80]
+        }
+
         // 0x8000 – 0x9FFF → VRAM
 
         return 0xFF
@@ -53,7 +63,7 @@ export class Bus {
 
     read16(address: number) {
         let low = this.read8(address);
-        let high = this.read8(address);
+        let high = this.read8(address + 1);
 
         return IntUtils.makeU16(low, high)
     }
@@ -69,6 +79,14 @@ export class Bus {
 
         else if (BETWEEN(address, 0x8000, 0x9FFF)) {
             this.vram[address - 0x8000] = value;
+        }
+
+        else if (BETWEEN(address, 0xFF00, 0xFF7F)) {
+            this.io[address - 0xFF00] = value;
+        }
+
+        else if (BETWEEN(address, 0xFF80, 0xFFFE)) {
+            this.hram[address - 0xFF80] = value;
         }
     }
 

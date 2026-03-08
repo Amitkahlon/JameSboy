@@ -148,7 +148,7 @@ export class Regs {
     }
 
     set C(val: boolean) {
-        this.f = IntUtils.setBit(this.f, 5, val)
+        this.f = IntUtils.setBit(this.f, 4, val)
     }
 
 

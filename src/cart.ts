@@ -21,11 +21,11 @@ export interface RomHeader {
 
 export class Cartridge {
 
-  rom: Uint8Array
+  public rom: Uint8Array
   rom_header: RomHeader
 
   private async loadROM(pathOrFile: string | File): Promise<Uint8Array> {
-    if (typeof window === "undefined") {
+    if (typeof pathOrFile === 'string') {
       // Node.js
       const { readFile } = await import("fs/promises");
       const path = await import("node:path");

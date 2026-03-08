@@ -23,8 +23,16 @@ export class CPU {
         this.regs = new Regs()
         this.instructionTable = new InstructionTable(this, this.regs, mem);
 
+        // this is the state of the registers after the bootrom is done.
+        
         this.regs.pc = 0x0100
         this.regs.a = 0x01
+        this.regs.f = 0xB0
+        this.regs.sp = 0xFFFE
+        this.regs.c = 0x13
+        this.regs.e = 0xD8
+        this.regs.h = 0x01
+        this.regs.l = 0x4D
     }
 
 
@@ -52,7 +60,7 @@ export class CPU {
                 return false
             }
 
-            console.log(`${currPc.toString(16)}: ${currInstruction.type.slice(3)} (${opcode.toString(16).padStart(2, '0')}) (${this.mem.read8(this.regs.pc + 1).toString(16)}) (${this.mem.read8(this.regs.pc + 2).toString(16)})`)
+            console.log(`0x${currPc.toString(16)}: ${currInstruction.type.slice(3)}(${opcode.toString(16).padStart(2, '0')}) (0x${this.mem.read8(currPc + 1).toString(16)}) (0x${this.mem.read8(currPc + 2).toString(16)})`)
 
             if (!this.execute(currInstruction)) return false
 

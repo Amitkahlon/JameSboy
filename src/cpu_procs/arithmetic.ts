@@ -65,7 +65,7 @@ export class ArithmeticProcesses {
 
         this.regs.Z = result === 0;
         this.regs.N = true;
-        this.regs.H = IntUtils.hasBorrow8(orig, 1)
+        this.regs.H = (orig & 0x0F) === 0;
 
         this.mem.write8(memDest, result)
 
@@ -108,11 +108,12 @@ export class ArithmeticProcesses {
         const targetVal = this.mem.read8(targetMemAddr)
 
         const newValRaw = targetVal + destVal
-        this.regs.hl = IntUtils.toU8(newValRaw);
+        this.regs.a = IntUtils.toU8(newValRaw);
 
+        this.regs.Z = this.regs.a === 0
         this.regs.N = false
-        this.regs.H = ((this.regs.hl & 0x0FFF) + (targetVal & 0x0FFF)) > 0x0FFF
-        this.regs.C = (this.regs.hl + targetVal) > 0xFFFF
+        this.regs.H = IntUtils.hasHalfCarry8(destVal, targetVal)
+        this.regs.C = IntUtils.hasCarry8(destVal, targetVal)
 
         return true
 
@@ -183,7 +184,8 @@ export class ArithmeticProcesses {
 
         this.regs.Z = result === 0;
         this.regs.N = true;
-        this.regs.H = IntUtils.hasBorrow8(this.regs.a, targetVal)
+        this.regs.H = IntUtils.halfBorrowSub8(this.regs.a, targetVal)
+        this.regs.C = IntUtils.hasBorrow8(this.regs.a, targetVal)
 
         this.regs.a = result
 
@@ -352,13 +354,14 @@ export class ArithmeticProcesses {
         const destVal = this.regs[regDest];
         const targetVal = this.regs[regTarget];
         const carry = (this.regs.C ? 1 : 0);
+        const result = destVal - targetVal - carry;
 
-        this.regs[destVal] = IntUtils.toU8(destVal - targetVal - carry);
+        this.regs[regDest] = IntUtils.toU8(result);
 
         //todo: maybe fix half borrow
         this.regs.Z = this.regs.a === 0
         this.regs.N = true
-        this.regs.H = IntUtils.halfBorrowSub8(destVal, targetVal - carry)
+        this.regs.H = (destVal & 0xF) < (targetVal & 0xF) + carry;
         this.regs.C = destVal < targetVal + carry
 
         return true
@@ -374,7 +377,7 @@ export class ArithmeticProcesses {
         //todo: maybe fix half borrow
         this.regs.Z = result === 0
         this.regs.N = true
-        this.regs.H = IntUtils.halfBorrowSub8(a, targetVal - carry)
+        this.regs.H = (a & 0xF) < (targetVal & 0xF) + carry;
         this.regs.C = a < targetVal + carry
 
         this.regs.a = result
@@ -393,7 +396,7 @@ export class ArithmeticProcesses {
 
         this.regs.Z = this.regs.a === 0
         this.regs.N = true
-        this.regs.H = IntUtils.halfBorrowSub8(a, immediate - carry)
+        this.regs.H = (a & 0xF) < (immediate & 0xF) + carry;
         this.regs.C = a < immediate + carry
 
         return true
@@ -405,14 +408,15 @@ export class ArithmeticProcesses {
         const destVal = this.regs[regDest];
         const targetVal = this.regs[regTarget];
         const carry = (this.regs.C ? 1 : 0);
+        const result = destVal + targetVal + carry;
 
-        this.regs[destVal] = IntUtils.toU8(destVal + targetVal + carry);
+        this.regs[regDest] = IntUtils.toU8(result);
 
         //todo: maybe fix half borrow
         this.regs.Z = this.regs.a === 0
         this.regs.N = false
-        this.regs.H = IntUtils.hasHalfCarry8(destVal, targetVal + carry)
-        this.regs.C = destVal < targetVal + carry
+        this.regs.H = (destVal & 0xF) + (targetVal & 0xF) + carry > 0xF;
+        this.regs.C = result > 0xFF;
 
         return true
     }
@@ -422,14 +426,15 @@ export class ArithmeticProcesses {
         const memTarget = this.regs.hl
         const targetVal = this.mem.read8(memTarget);
         const carry = (this.regs.C ? 1 : 0);
+        const result = a + targetVal + carry;
 
-        this.regs.a = IntUtils.toU8(a + targetVal + carry);
+        this.regs.a = IntUtils.toU8(result);
 
         //todo: maybe fix half borrow
         this.regs.Z = this.regs.a === 0
         this.regs.N = false
-        this.regs.H = IntUtils.hasHalfCarry8(a, targetVal + carry)
-        this.regs.C = a < targetVal + carry
+        this.regs.H = (a & 0xF) + (targetVal & 0xF) + carry > 0xF;
+        this.regs.C = result > 0xFF;
 
         return true;
     }
@@ -439,12 +444,13 @@ export class ArithmeticProcesses {
         const immediate = this.cpu.fetch()
         const a = this.regs.a;
         const carry = (this.regs.C ? 1 : 0);
-        this.regs.a = IntUtils.toU8(a + immediate + carry);
+        const result = a + immediate + carry;
+        this.regs.a = IntUtils.toU8(result);
 
         this.regs.Z = this.regs.a === 0
         this.regs.N = false
-        this.regs.H = IntUtils.hasHalfCarry8(a, immediate + carry)
-        this.regs.C = a < immediate + carry
+        this.regs.H = (a & 0xF) + (immediate & 0xF) + carry > 0xF;
+        this.regs.C = result > 0xFF;
 
         return true
     }

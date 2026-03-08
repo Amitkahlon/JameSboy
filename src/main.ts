@@ -83,7 +83,7 @@ function setFlag(id, on) {
   el.classList.toggle('off', !on);
 }
 
-const drawUI = (regs: Regs) => {
+const drawUI = (regs: Regs, oldRegs?: Regs) => {
   setReg('reg-a', regs.a)
   setReg('reg-f', regs.f)
   setReg('reg-b', regs.b)
